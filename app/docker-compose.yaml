@@ -1,0 +1,20 @@
+services:
+  task_manager:
+    build:
+      context: .
+      dockerfile: app/task_manager.Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - location-service
+      - redis
+    healthcheck:
+      test: [ "CMD", "curl", "-G", "http://localhost:8080/objects/" ]
+      interval: 10m
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+    networks:
+      - location-network
+      - redis-network
+      - monitoring-network

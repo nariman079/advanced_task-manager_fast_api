@@ -1,0 +1,17 @@
+rule_files:
+  - '/etc/prometheus/alerts.yaml'
+
+scrape_configs:
+  - job_name: 'task_manager'
+    scrape_interval: 3s
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['task_manager:8080']
+
+  - job_name: 'push-gateway'
+    scrape_interval: 3s
+    metrics_path: '/metrics'
+    static_configs:
+        - targets: ['push-gateway:9091']
+
+

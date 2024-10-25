@@ -1,0 +1,13 @@
+services:
+  stream-service:
+    build:
+      context: .
+      dockerfile: stream/stream.Dockerfile
+    depends_on:
+      - redis
+      - push-gateway
+    networks:
+      - redis-network
+      - monitoring-network
+    environment:
+      - PYTHONUNBUFFERED=1

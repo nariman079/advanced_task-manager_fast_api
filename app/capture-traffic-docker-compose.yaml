@@ -1,0 +1,8 @@
+services:
+  hoverfly:
+    image: spectolabs/hoverfly
+    ports:
+      - "8500:8500"
+      - "8888:8888"
+
+    entrypoint: ["hoverfly", "-capture", "-listen-on-host", "0.0.0.0"]

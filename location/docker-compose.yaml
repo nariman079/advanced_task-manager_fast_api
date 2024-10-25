@@ -1,0 +1,17 @@
+services:
+  location-service:
+    build:
+      context: .
+      dockerfile: location/locations.Dockerfile
+    depends_on:
+      - redis
+    networks:
+      - location-network
+      - redis-network
+      - monitoring-network
+    healthcheck:
+      test: ["CMD", "curl", "-G", "http://localhost:8081/ping" ]
+      interval: 5m
+      retries: 5
+      start_period: 1s
+      timeout: 40s

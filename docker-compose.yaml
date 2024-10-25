@@ -1,0 +1,95 @@
+services:
+  redis:
+    image: redis
+    networks:
+      - redis_network
+
+  task_manager:
+    build:
+      context: .
+      dockerfile: app/task_manager.Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - locations
+      - redis
+    volumes:
+      - app_volumes:/app/task_manager/
+    healthcheck:
+      test: ["CMD", "curl", "-G", "http://localhost:8080/objects/"]
+      interval: 10m
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+    networks:
+      - location_network
+      - redis_network
+      - monitor_network
+
+
+
+  locations:
+    build:
+      context: .
+      dockerfile: location/locations.Dockerfile
+    depends_on:
+      - redis
+    volumes:
+      - location_volumes:/app/locations/
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD","curl", "-G", "http://localhost:8081/ping"]
+      retries: 5
+      start_period: 1s
+      timeout: 10s
+      interval: 5m
+    networks:
+      - redis_network
+      - location_network
+
+
+  stream-service:
+    build:
+      context: .
+      dockerfile: stream/stream.Dockerfile
+    volumes:
+      - stream_volumes:/app/stream/
+    depends_on:
+      - redis
+      - push-gateway
+    networks:
+      - redis_network
+      - monitor_network
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yaml
+      - ./alerts.yaml:/etc/prometheus/alerts.yaml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+    networks:
+      - monitor_network
+
+  push-gateway:
+    image: prom/pushgateway
+    ports:
+      - "9091:9091"
+    networks:
+      - monitor_network
+
+volumes:
+  app_volumes:
+  location_volumes:
+  stream_volumes:
+
+
+networks:
+  location_network:
+  redis_network:
+  monitor_network:

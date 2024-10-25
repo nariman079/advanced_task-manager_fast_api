@@ -1,0 +1,11 @@
+groups:
+  - name: stream-service
+    rules:
+      - alert: HighMessageRate
+        expr: received_messages_from_stream_total > 1 # Условие срабатывания алерта
+        for: 5s
+        labels:
+          severity: "critical"
+        annotations:
+          summary: "Высокая скорость получения сообщений"
+          description: "Получено более 100 сообщений за последнее время"
